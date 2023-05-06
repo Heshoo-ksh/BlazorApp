@@ -8,7 +8,7 @@
 
 <h3>Add Contact</h3>
 
-<EditForm Model="newContact" OnValidSubmit="HandleValidSubmit">
+<EditForm Model="@newContact" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
@@ -43,10 +43,11 @@
     private void HandleValidSubmit(EditContext editContext)
     {
         var contact = (Contact)editContext.Model;
-        contactService.AddContact(contact);
+        contactService.CreateContact(contact);
         
         Navigation.NavigateTo("/");
     }
+
     /* This code works prefectly fine when we dont need to use the ContactService
      * private async Task HandleValidSubmit()
     {

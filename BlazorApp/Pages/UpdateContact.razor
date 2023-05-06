@@ -1,0 +1,72 @@
+﻿@page "/updatecontact/{Id}"
+@using BlazorApp.Data
+@using Microsoft.EntityFrameworkCore
+@inject NavigationManager Navigation
+@inject IDbContextFactory<ContactContext> DbFactory
+@using BlazorApp.Services
+@inject ContactService contactService
+<h3>Update Contact</h3>
+
+@if (contact == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="@contact" OnValidSubmit="SaveUpdatedContact">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="FirstName">First Name:</label>
+            <InputText id="FirstName" @bind-Value="@contact.FirstName" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="LastName">Last Name:</label>
+            <InputText id="LastName" @bind-Value="@contact.LastName" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="PhoneNumber">Phone Number:</label>
+            <InputText id="PhoneNumber" @bind-Value="@contact.PhoneNumber" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="BirthDate">Date of Birth:</label>
+            <InputDate id="BirthDate" @bind-Value="@contact.BirthDate" class="form-control" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update</button>
+        <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+        <button type="button" class="btn btn-danger" @onclick="DeleteContact">Delete</button>
+    </EditForm>
+
+}
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+
+    private Contact contact;
+
+    protected override async Task OnInitializedAsync()
+    {
+        contact = await contactService.GetContactById(Guid.Parse(Id));
+    }
+
+    private async Task SaveUpdatedContact()
+    {
+        await contactService.UpdateContact(contact);
+        Navigation.NavigateTo("/");
+    }
+
+    private async Task DeleteContact()
+    {
+        await contactService.DeleteContact(contact.Id);
+        Navigation.NavigateTo("/");
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/");
+    }
+}

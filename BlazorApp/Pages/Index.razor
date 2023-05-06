@@ -26,6 +26,8 @@ else
                 <th>First Name</th>
                 <th>Phone Number</th>
                 <th>Date Of Birth</th>
+                <th>Actions</th>
+
             </tr>
         </thead>
         <tbody>
@@ -36,6 +38,10 @@ else
                     <td>@contact.FirstName</td>
                     <td>@contact.PhoneNumber</td>
                     <td>@contact.BirthDate.ToString()</td>
+                    <td>
+                        <button @onclick="(() => NavigateToEditContact(contact.Id))" class="btn btn-warning">Edit</button>
+                        
+                    </td>
                 </tr>
             }
         </tbody>
@@ -57,4 +63,9 @@ else
     {
         Navigation.NavigateTo("/createcontact");
     }
+    private void NavigateToEditContact(Guid id)
+    {
+        Navigation.NavigateTo($"/updatecontact/{id}");
+    }
+
 }

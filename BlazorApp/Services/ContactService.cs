@@ -15,7 +15,7 @@ namespace BlazorApp.Services
             this.dbContextFactory = dbContextFactory;
         }
         
-        public async void AddContact(Contact contact)
+        public async void CreateContact(Contact contact)
         {
             using (var context = dbContextFactory.CreateDbContext())
             {
@@ -24,6 +24,34 @@ namespace BlazorApp.Services
             }
             //Navigation.NavigateTo("/");
         }
-        
+        public async Task<Contact> GetContactById(Guid id)
+        {
+            using (var context = dbContextFactory.CreateDbContext())
+            {
+                return await context.Contacts.FindAsync(id);
+            }
+        }
+
+        public async Task UpdateContact(Contact contact)
+        {
+            using (var context = dbContextFactory.CreateDbContext())
+            {
+                context.Contacts.Update(contact);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public async Task DeleteContact(Guid id)
+        {
+            using (var context = dbContextFactory.CreateDbContext())
+            {
+                var contact = await context.Contacts.FindAsync(id);
+                if (contact != null)
+                {
+                    context.Contacts.Remove(contact);
+                    await context.SaveChangesAsync();
+                }
+            }
+        }
     }
 }
