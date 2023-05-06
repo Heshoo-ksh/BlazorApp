@@ -18,6 +18,7 @@ Welcome to your Blazor Server with EF core app.
 }
 else
 {
+    <button @onclick="NavigateToAddContact" class="btn btn-primary add-contact-button">Add Contact</button>
     <table class="table">
         <thead>
             <tr>
@@ -39,6 +40,7 @@ else
             }
         </tbody>
     </table>
+
 }
 
 @code {
@@ -46,10 +48,13 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        using (var context = DbFactory.CreateDbContext())
+        using var context = DbFactory.CreateDbContext();
         {
             contacts = await context.Contacts.ToArrayAsync();
         }
-
+    }
+    private void NavigateToAddContact()
+    {
+        Navigation.NavigateTo("/createcontact");
     }
 }
