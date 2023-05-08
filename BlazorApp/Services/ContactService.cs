@@ -53,9 +53,7 @@ namespace BlazorApp.Services
                     await context.SaveChangesAsync();
                 }
             }
-        }
-
-       
+        }   
 
         public async Task<Contact[]> GetAllContacts()
         {
