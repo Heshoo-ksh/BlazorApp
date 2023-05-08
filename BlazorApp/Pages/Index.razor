@@ -3,22 +3,53 @@
 @using Microsoft.EntityFrameworkCore;
 @inject NavigationManager Navigation
 @inject IDbContextFactory<ContactContext> DbFactory
+@using BlazorApp.Services
+@inject ContactService contactService
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+
 <PageTitle>Index</PageTitle>
 
 <h1>Contacts Blazor App</h1>
 
-Welcome to your Blazor Server with EF core app.
+Welcome to your Contacts Blazor Server with EF core app.
+<div class="form-group d-flex align-items-end">
+    <div class="mr-3">
+        <label for="searchField">Search by:</label>
+        <div class="input-group">
+            <InputSelect id="searchField" @bind-Value="searchField" class="form-control">
+                <option value="FirstName">First Name</option>
+                <option value="LastName">Last Name</option>
+            </InputSelect>
+        </div>
+    </div>
+    <div class="mr-3">
+        <label for="searchValue">Search:</label>
+        <div class="input-group">
+            <InputText id="searchValue" @bind-Value="searchValue" @oninput="FilterContacts" class="form-control" />
+            <span class="input-group-text bg-white border-left-0">
+                <i class="fas fa-search"></i>
+            </span>
+        </div>
+    </div>
+    <div class="mr-3">
+        <label>&nbsp;</label> <!-- Empty label for proper alignment -->
+        <button @onclick="ClearSearch" class="btn btn-danger form-control">Clear</button>
+    </div>
+</div>
 
 
-<p>This component demonstrates fetching contacts data from the service.</p>
-
-@if (contacts == null)
+@if (filteredContacts == null)
 {
     <p><em>Loading...</em></p>
 }
+else if (filteredContacts.Length == 0)
+{
+    <p><em>No contacts found.</em></p>
+}
 else
 {
-    <button @onclick="NavigateToAddContact" class="btn btn-primary add-contact-button">Add Contact</button>
+    <button @onclick="NavigateToAddContact" class="btn btn-primary add-contact-button mt-3">Add Contact</button>
     <table class="table">
         <thead>
             <tr>
@@ -31,7 +62,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var contact in contacts)
+            @foreach (var contact in filteredContacts)
             {
                 <tr>
                     <td>@contact.LastName</td>
@@ -40,7 +71,6 @@ else
                     <td>@contact.BirthDate.ToString()</td>
                     <td>
                         <button @onclick="(() => NavigateToEditContact(contact.Id))" class="btn btn-warning">Edit</button>
-                        
                     </td>
                 </tr>
             }
@@ -51,13 +81,41 @@ else
 
 @code {
     private Contact[]? contacts;
+    private bool dataLoading = false;
+    private Contact[]? filteredContacts;
+    private string searchField = "FirstName";
+    private string searchValue = "";
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
+        if (dataLoading){ return;}
+        try
         {
-            contacts = await context.Contacts.ToArrayAsync();
+            dataLoading = true;
+            contacts = await contactService.GetAllContacts();
+            filteredContacts = contacts;
+
         }
+        catch (Exception){ throw; }
+        finally { dataLoading = false;}
+
+    }
+
+    private void FilterContacts(ChangeEventArgs SearchString)
+    {
+        searchValue = SearchString.Value.ToString();
+        filteredContacts = string.IsNullOrWhiteSpace(searchValue) ? contacts :
+            contacts.Where(c =>
+                (searchField == "FirstName" && c.FirstName.Contains(searchValue, StringComparison.OrdinalIgnoreCase)) ||
+                (searchField == "LastName" && c.LastName.Contains(searchValue, StringComparison.OrdinalIgnoreCase))
+            ).ToArray();
+    }
+    private void ClearSearch()
+    {
+        searchValue = "";
+        filteredContacts = contacts;
+        StateHasChanged(); // <-- Add this line
+
     }
     private void NavigateToAddContact()
     {
@@ -67,5 +125,11 @@ else
     {
         Navigation.NavigateTo($"/updatecontact/{id}");
     }
+
+    private void ToggleDropdown()
+    {
+        searchField = searchField == "FirstName" ? "LastName" : "FirstName";
+    }
+
 
 }

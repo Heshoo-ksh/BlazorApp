@@ -5,6 +5,9 @@
 @inject IDbContextFactory<ContactContext> DbFactory
 @using BlazorApp.Services
 @inject ContactService contactService
+@inject IJSRuntime JSRuntime
+
+
 <h3>Update Contact</h3>
 
 @if (contact == null)
@@ -36,7 +39,7 @@ else
 
         <button type="submit" class="btn btn-primary">Update</button>
         <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
-        <button type="button" class="btn btn-danger" @onclick="DeleteContact">Delete</button>
+        <button type="button" class="btn btn-danger" @onclick="() => ConfirmDelete()">Delete</button>
     </EditForm>
 
 }
@@ -58,7 +61,14 @@ else
         await contactService.UpdateContact(contact);
         Navigation.NavigateTo("/");
     }
-
+    private async Task ConfirmDelete()
+    {
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this contact?");
+        if (confirmed)
+        {
+            await DeleteContact();
+        }
+    }
     private async Task DeleteContact()
     {
         await contactService.DeleteContact(contact.Id);

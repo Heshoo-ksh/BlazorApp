@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System;
 
 namespace BlazorApp.Services
 {
@@ -51,6 +52,16 @@ namespace BlazorApp.Services
                     context.Contacts.Remove(contact);
                     await context.SaveChangesAsync();
                 }
+            }
+        }
+
+       
+
+        public async Task<Contact[]> GetAllContacts()
+        {
+            using (var context = dbContextFactory.CreateDbContext())
+            {
+                return await context.Contacts.ToArrayAsync();
             }
         }
     }
